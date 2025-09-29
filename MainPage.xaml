@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:MauiWeatherApp.ViewModels"
+             xmlns:converters="clr-namespace:MauiWeatherApp.Converters"
+             x:Class="MauiWeatherApp.MainPage">
+
+    <ContentPage.BindingContext>
+        <viewModels:WeatherViewModel />
+    </ContentPage.BindingContext>
+
+    <ContentPage.Resources>
+        <converters:NotNullConverter x:Key="NotNullConverter" />
+        <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Padding="20">
+
+            <!-- Search Box -->
+            <HorizontalStackLayout Spacing="10">
+                <Entry x:Name="SearchEntry" 
+                       Placeholder="Enter city name" 
+                       WidthRequest="200"
+                       Completed="OnSearchCompleted"/>
+                <Button Text="Search" 
+                        Command="{Binding SearchCommand}"
+                        CommandParameter="{Binding Text, Source={x:Reference SearchEntry}}"/>
+            </HorizontalStackLayout>
+
+            <!-- Refresh Button -->
+            <Button Text="Refresh Weather" 
+                    Command="{Binding RefreshCommand}"
+                    IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+
+            <!-- Loading Indicator -->
+            <ActivityIndicator IsRunning="{Binding IsLoading}" 
+                             IsVisible="{Binding IsLoading}"
+                             HorizontalOptions="Center"/>
+
+            <!-- Error Message -->
+            <Label Text="{Binding ErrorMessage}" 
+                   TextColor="Red" 
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource NotNullConverter}}"
+                   HorizontalOptions="Center"/>
+
+            <!-- Weather Data -->
+            <Border IsVisible="{Binding WeatherData, Converter={StaticResource NotNullConverter}}"
+                   Padding="20"
+                   BackgroundColor="{AppThemeBinding Light=White, Dark=#2b2b2b}">
+
+                <VerticalStackLayout Spacing="15">
+
+                    <!-- City Name -->
+                    <Label Text="{Binding WeatherData.CityName}" 
+                           FontSize="24" 
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"/>
+
+                    <!-- Temperature -->
+                    <Label Text="{Binding WeatherData.Main.Temperature, StringFormat='{0}°C'}" 
+                           FontSize="48"
+                           HorizontalOptions="Center"/>
+
+                    <!-- Weather Description -->
+                    <Label Text="{Binding WeatherData.Weather[0].Description}" 
+                           FontSize="18"
+                           HorizontalOptions="Center"/>
+
+                    <!-- Weather Details -->
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="*,*,*" 
+                          ColumnSpacing="20" RowSpacing="10">
+
+                        <Label Text="Feels like:" Grid.Row="0" Grid.Column="0"/>
+                        <Label Text="{Binding WeatherData.Main.FeelsLike, StringFormat='{0}°C'}" 
+                               Grid.Row="0" Grid.Column="1"/>
+
+                        <Label Text="Humidity:" Grid.Row="1" Grid.Column="0"/>
+                        <Label Text="{Binding WeatherData.Main.Humidity, StringFormat='{0}%'}" 
+                               Grid.Row="1" Grid.Column="1"/>
+
+                        <Label Text="Wind:" Grid.Row="2" Grid.Column="0"/>
+                        <Label Text="{Binding WeatherData.Wind.Speed, StringFormat='{0} m/s'}" 
+                               Grid.Row="2" Grid.Column="1"/>
+                    </Grid>
+
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
